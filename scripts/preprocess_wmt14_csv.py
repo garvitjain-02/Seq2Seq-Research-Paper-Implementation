@@ -7,7 +7,7 @@ from tqdm import tqdm
 # --------------- CONFIGURATION ---------------
 RAW_DIR = r"C:\Users\Lenovo\Desktop\Research paper\Seq2Seq-Research-Paper-Implementation\data\raw"
 PROC_DIR = r"C:\Users\Lenovo\Desktop\Research paper\Seq2Seq-Research-Paper-Implementation\data\processed"
-VOCAB_SIZE_SRC = 6000   # Adjust for your hardware
+VOCAB_SIZE_SRC = 6000
 VOCAB_SIZE_TGT = 6000
 UNK_TOKEN = '<UNK>'
 SOS_TOKEN = '<SOS>'
@@ -72,8 +72,8 @@ def process_and_save(csv_path, src_sp, tgt_sp, src_vocab, tgt_vocab, out_src_pat
 
 def main():
     os.makedirs(PROC_DIR, exist_ok=True)
-    # Step 1: Convert CSV to plain text (needed for SentencePiece training)
-    
+
+    # Converting CSV to plain text (needed for SentencePiece training)
     for split in ['train', 'val', 'test']:
         csv_path = os.path.join(RAW_DIR, f"{split}.csv")
         src_txt = os.path.join(PROC_DIR, f"{split}.en.txt")
@@ -81,22 +81,22 @@ def main():
         csv_to_txt(csv_path, src_txt, tgt_txt)
 
 
-    # Step 2: Train SentencePiece models on train split
+    # Training SentencePiece models on train split
     print("Training SentencePiece models...")
     train_sentencepiece(os.path.join(PROC_DIR, "train.en.txt"), os.path.join(PROC_DIR, "spm_en"), VOCAB_SIZE_SRC)
     train_sentencepiece(os.path.join(PROC_DIR, "train.fr.txt"), os.path.join(PROC_DIR, "spm_fr"), VOCAB_SIZE_TGT)
 
-    # Step 3: Load SentencePiece models
+    # Loading SentencePiece models
     sp_src = load_sentencepiece(os.path.join(PROC_DIR, "spm_en"))
     sp_tgt = load_sentencepiece(os.path.join(PROC_DIR, "spm_fr"))
 
-    # Step 4: Build vocabularies
+    # Build vocabularies
     src_vocab = build_vocab(sp_src, VOCAB_SIZE_SRC)
     tgt_vocab = build_vocab(sp_tgt, VOCAB_SIZE_TGT)
     src_vocab.add(UNK_TOKEN)
     tgt_vocab.update([UNK_TOKEN, SOS_TOKEN, EOS_TOKEN])
 
-    # Step 5: Process and save splits
+    # Process and save splits
     for split in ['train', 'val', 'test']:
         csv_path = os.path.join(RAW_DIR, f"{split}.csv")
         out_src = os.path.join(PROC_DIR, f"{split}.proc.en")
